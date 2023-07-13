@@ -1,0 +1,60 @@
+* 2.11BSD httpd
+
+This web server rapidly grew into something very different and reasonably powerful. Strongly recommended that you use the later versions, which can be found on the PiDP-11 google groups. At the time of writing, the latest version is https://groups.google.com/forum/#!msg/pidp-11/nE5W6wAEIxA/7mGpfjAYAwAJ
+
+
+A small, and fairly bad, web server which runs under 2.11BSD.
+
+- Only supports GET.
+- Will send images, add your own MIME types if you like.
+- Assumes web root is ~/var/www~
+- Probably insecure.
+- Contributions very welcome.
+
+If my PDP-11 is running, you can see the page it hosts at
+http://catbert.rhwyd.co.uk or alternative
+http://emubert.rhwyd.co.uk
+
+** Setup Instructions
+
+Copy httpd.c to your PDP-11, compile it and move the binary to the
+proper place:
+
+#+BEGIN_SRC
+cc httpd.c -o httpd
+mv httpd /usr/libexec/httpd
+#+END_SRC
+
+Append the following line to ~/etc/inetd.conf~
+
+#+BEGIN_SRC
+http    stream  tcp     nowait  nobody  /usr/libexec/tcpd       httpd
+#+END_SRC
+or
+#+BEGIN_SRC
+http    stream  tcp     nowait  nobody  /usr/libexec/httpd      httpd
+#+END_SRC
+
+using ~tcpd~ instead of directly calling ~httpd~ (you can if you
+like), will allow you to user your ~hosts.allow~ file to limit
+access. If ~inetd~ was compiled with ~-DPARANOID~ (it probably was),
+it will also block hosts which have wrong reverse DNS records, which
+may not be desirable.
+
+Append the following line to ~/etc/services~
+
+#+BEGIN_SRC
+http            80/tcp
+#+END_SRC
+
+Find the process ID of inetd and send it a HUP:
+
+#+BEGIN_SRC
+ps aux | grep inetd
+kill -HUP <PID>
+#+END_SRC
+
+Finally, create ~/var/www/index.html~, along with your other files,
+and ensure they are readable by nobody, or world readable.
+
+
